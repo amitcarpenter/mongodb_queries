@@ -280,7 +280,45 @@ router.get("/or-method-use", async (req, res) => {
 router.get("/not-in-method", async (req, res) => {
   try {
     const restaurants_data = await Restaurants.find({
-   cuisine : {$nin : []} })
+      cuisine: { $nin: [] },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 20. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants which achieved a score which is not more than 10.
+router.get("/not-more-then", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      { "grades.score": { $not: { $gt: 10 } } },
+      { restaurant_id: 1, name: 1, borough: 1, cuisine: 1 }
+    );
+    res.send(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 21. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants which prepared dish except 'American' and 'Chinees' or restaurant's name begins with letter 'Wil'.
+router.get("/or-filter", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        $or: [
+          { name: /^Wil/ },
+          {
+            $and: [
+              { cuisine: { $ne: "American" } },
+              { cuisine: { $ne: "Chinees" } },
+            ],
+          },
+        ],
+      },
+      { restaurant_id: 1, name: 1, cuisine: 1, borough: 1 }
+    );
+
+    res.send(restaurants_data);
   } catch (error) {
     console.log(error);
   }
