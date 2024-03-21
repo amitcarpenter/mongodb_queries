@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Market Data Filter</title>
+    <style>
+      .exchange-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .exchange-name {
+        font-weight: bold;
+      }
+      .add-button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Market Data Filter</h1>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Enter at least 3 characters"
+    />
+    <div id="filteredData"></div>
+    <button id="loadMoreBtn" style="display: none">Load More</button>
+    <div id="loader" style="display: none">Loading...</div>
+
+    <script>
+      let page = 1;
+      let fetching = false;
+      let lastQuery = "";
+      let allFilteredData = [];
+      let nextFilteredData = [];
+
+      const searchInput = document.getElementById("searchInput");
+      const filteredData = document.getElementById("filteredData");
+      const loadMoreBtn = document.getElementById("loadMoreBtn");
+      const loader = document.getElementById("loader");
+
+      async function fetchData(query) {
+        fetching = true;
+        try {
+          const response = await fetch(`/api/filter-by-exchange`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query, page }),
+          });
+          const data = await response.json();
+          if (page === 1) {
+            allFilteredData = data;
+          } else {
+            nextFilteredData = data;
+          }
+          displayData();
+          fetching = false;
+        } catch (error) {
+          console.error("Error:", error);
+          fetching = false;
+        }
+      }
+
+      function addDataToDatabase(objectId) {
+        console.log(`Adding data for exchange: ${objectId}`);
+        fetch("/api/add-instrument-keys", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ objectId }),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data))
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function displayData() {
+        filteredData.innerHTML = "";
+        const combinedData = [...allFilteredData, ...nextFilteredData];
+        combinedData.forEach((item) => {
+          const exchangeContainer = document.createElement("div");
+          exchangeContainer.classList.add("exchange-container");
+
+          const exchangeName = document.createElement("span");
+          exchangeName.textContent = `${item.exchange}: ${item.name} `;
+          exchangeName.classList.add("exchange-name");
+
+          const addButton = document.createElement("button");
+          addButton.textContent = "Add";
+          addButton.classList.add("add-button");
+          addButton.addEventListener("click", () =>
+            addDataToDatabase(item._id)
+          );
+
+          exchangeContainer.appendChild(exchangeName);
+          exchangeContainer.appendChild(addButton);
+
+          filteredData.appendChild(exchangeContainer);
+        });
+
+        if (combinedData.length > 0) {
+          loadMoreBtn.style.display = "block";
+        } else {
+          loadMoreBtn.style.display = "none";
+        }
+      }
+
+      searchInput.addEventListener("input", async () => {
+        const query = searchInput.value.trim();
+        if (query === lastQuery) {
+          return;
+        }
+        lastQuery = query;
+        page = 1;
+        await fetchData(query);
+      });
+
+      loadMoreBtn.addEventListener("click", async () => {
+        page++;
+        allFilteredData = [...allFilteredData, ...nextFilteredData];
+        nextFilteredData = [];
+        loader.style.display = "block";
+        await fetchData(lastQuery);
+        loader.style.display = "none";
+      });
+
+      window.addEventListener("scroll", () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+          loadMoreBtn.click();
+        }
+      });
+
+      // Initial data fetch
+      fetchData("");
+    </script>
+  </body>
+</html>
