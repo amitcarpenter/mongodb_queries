@@ -817,4 +817,259 @@ router.get("/and-or-not-elemMatch", async (req, res) => {
   }
 });
 
+// 51. Write a MongoDB query to find the average score for each restaurant.
+router.get("/average-score-of-restaurant", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$restaurant_id",
+          avgScore: {
+            $avg: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 52. Write a MongoDB query to find the highest score for each restaurant.
+router.get("/get-highest-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$name",
+          HighestScore: {
+            $max: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//53. Write a MongoDB query to find the lowest score for each restaurant.
+router.get("/get-lowest-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$name",
+          minimum_score: {
+            $min: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 54. Write a MongoDB query to find the count of restaurants in each borough.
+router.get("/get-score-by-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $group: {
+          _id: "$borough",
+          borough_count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 55. Write a MongoDB query to find the count of restaurants for each cuisine.
+router.get("/get-count-of-cuisine", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $group: {
+          _id: "$cuisine",
+          cuisine_count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 56. Write a MongoDB query to find the count of restaurants for each cuisine and borough.
+router.get("/get-count-of-cuisine-and-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $group: {
+          _id: {
+            cuisine: "$cuisine",
+            borough: "$borough",
+          },
+          both_count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 57. Write a MongoDB query to find the count of restaurants that received a grade of 'A' for each cuisine.
+router.get("/get-matched-score-of-restaurant", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $match: { "grades.grade": "A" },
+      },
+      {
+        $group: {
+          _id: "$cuisine",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 58. Write a MongoDB query to find the count of restaurants that received a grade of 'A' for each borough.
+router.get("/get-count-of-grade-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $match: { "grades.grade": "A" },
+      },
+      {
+        $group: {
+          _id: "$borough",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 59. Write a MongoDB query to find the count of restaurants that received a grade of 'A' for each cuisine and borough.
+router.get("/get-count-for-both-cuisine-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $match: { "grades.grade": "A" },
+      },
+      {
+        $group: {
+          _id: {
+            borough: "$borough",
+            cuisine: "$cuisine",
+          },
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 60. Write a MongoDB query to find the number of restaurants that have been graded in each month of the year.
+router.get("/get-data-by-project-in-aggregate", async (req, res) => {
+  const restaurants_data = await Restaurants.aggregate([
+    {
+      $unwind: "$grades",
+    },
+    {
+      $project: {
+        month: { $month: { $toDate: "$grades.date" } },
+        year: { $year: { $toDate: "$grades.date" } },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: "$year",
+          month: "$month",
+        },
+        number: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },
+  ]);
+
+  console.log(restaurants_data);
+  res.json(restaurants_data);
+});
+
 module.exports = router;
