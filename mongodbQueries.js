@@ -1072,4 +1072,711 @@ router.get("/get-data-by-project-in-aggregate", async (req, res) => {
   res.json(restaurants_data);
 });
 
+//61. Write a MongoDB query to find the average score for each cuisine.
+router.get("/get-ave-of-cuisine", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$cuisine",
+          avgScore: {
+            $avg: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+//62. Write a MongoDB query to find the highest score for each cuisine.
+router.get("/get-highest-score-of-each-cuisine", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$cuisine",
+          HighestScore: {
+            $max: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 63. Write a MongoDB query to find the lowest score for each cuisine.
+router.get("/get-lowest-score-of-each-cuisine", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$cuisine",
+          minimum_score: {
+            $min: "$grades.score",
+          },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 64. Write a MongoDB query to find the average score for each borough.
+router.get("/get-average-score-of-each-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$borough",
+          avgScore: {
+            $avg: "$grades.score",
+          },
+        },
+      },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 65. Write a MongoDB query to find the highest score for each borough.
+router.get("/get-higest-score-of-each-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$borough",
+          HighestScore: {
+            $max: "$grades.score",
+          },
+        },
+      },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 66. Write a MongoDB query to find the lowest score for each borough.
+router.get("/get-lowest-score-of-each-borough", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$borough",
+          minimum_score: {
+            $min: "$grades.score",
+          },
+        },
+      },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 67. Write a MongoDB query to find the name and address of the restaurants that received a grade of 'A' on a specific date.
+router.get("/get-find-query-start", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        grades: {
+          $elemMatch: {
+            date: {
+              $eq: ISODate("2013-07-22T00:00:00Z"),
+            },
+            grade: {
+              $eq: "A",
+            },
+          },
+        },
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 68. Write a MongoDB query to find the name and address of the restaurants that received a grade of 'B' or 'C' on a specific date.
+router.get("/get-find-query-start-2", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        grades: {
+          $elemMatch: {
+            date: {
+              $eq: ISODate("2013-07-22T00:00:00Z"),
+            },
+            grade: {
+              $in: ["B", "C"],
+            },
+          },
+        },
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 69. Write a MongoDB query to find the name and address of the restaurants that have at least one 'A' grade and one 'B' grade.
+router.get("/get-find-query-start-2", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        $and: [{ "grades.grade": "A" }, { "grades.grade": "B" }],
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 70. Write a MongoDB query to find the name and address of the restaurants that have at least one 'A' grade and no 'B' grades.
+router.get("/get-find-query-start-3", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        $and: [{ "grades.grade": "A" }, { "grades.grade": { $ne: "B" } }],
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 71. Write a MongoDB query to find the name ,address and grades of the restaurants that have at least one 'A' grade and no 'C' grades.
+router.get("/get-find-query-start-4", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        $and: [{ "grades.grade": "A" }, { "grades.grade": { $ne: "C" } }],
+      },
+      {
+        name: 1,
+        address: 1,
+        "grades.grade": 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 72. Write a MongoDB query to find the name, address, and grades of the restaurants that have at least one 'A' grade, no 'B' grades, and no 'C' grades.
+router.get("/get-find-query-start-5", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        $and: [
+          { "grades.grade": "A" },
+          { "grades.grade": { $ne: "B" } },
+          { "grades.grade": { $ne: "C" } },
+        ],
+      },
+      {
+        name: 1,
+        address: 1,
+        "grades.grade": 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 73. Write a MongoDB query to find the name and address of the restaurants that have the word 'coffee' in their name.
+router.get("/get-find-query-start-6", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        name: { $regex: /coffee/i },
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 74. Write a MongoDB query to find the name and address of the restaurants that have a zipcode that starts with '10'.
+router.get("/get-find-query-start-7", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      {
+        "address.zipcode": /^10/,
+      },
+      {
+        name: 1,
+        address: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 75. Write a MongoDB query to find the name and address of the restaurants that have a cuisine that starts with the letter 'B'.
+router.get("/get-find-query-start-8", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      { cuisine: { $regex: /^B/ } },
+      {
+        name: 1,
+        address: 1,
+        cuisine: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 76. Write a MongoDB query to find the name, address, and cuisine of the restaurants that have a cuisine that ends with the letter 'y'.
+router.get("/get-find-query-start-9", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      { cuisine: { $regex: /y$/i } },
+      {
+        name: 1,
+        address: 1,
+        cuisine: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 77. Write a MongoDB query to find the name, address, and cuisine of the restaurants that have a cuisine that contains the word 'Pizza'.
+router.get("/get-find-query-start-10", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find(
+      { cuisine: { $regex: /Pizza/i } },
+      {
+        name: 1,
+        address: 1,
+        cuisine: 1,
+        _id: 0,
+      }
+    );
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 78. Write a MongoDB query to find the restaurants achieved highest average score.
+router.get("/get-highest-average-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $group: {
+          _id: "$restaurant_id",
+          avgScore: {
+            $avg: "$grades.score",
+          },
+        },
+      },
+      { $sort: { avgScore: -1 } },
+      { $limit: 1 },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 79. Write a MongoDB query to find all the restaurants with the highest number of "A" grades.
+router.get("/get-highest-number-a", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $match: {
+          "grades.grade": "A",
+        },
+      },
+      {
+        $group: {
+          _id: "$restaurant_id",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $group: {
+          _id: "$count",
+          restaurant: {
+            $push: "$_id",
+          },
+        },
+      },
+      {
+        $sort: { _id: -1 },
+      },
+      { $limit: 1 },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 80. Write a MongoDB query to find the cuisine type that is most likely to receive a "C" grade
+router.get("/get-highest-number-a-1", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $unwind: "$grades",
+      },
+      {
+        $match: {
+          "grades.grade": "C",
+        },
+      },
+      {
+        $group: {
+          _id: "$cuisine",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+    ]);
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 81. Write a MongoDB query to find the restaurant that has the highest average score for the cuisine "Turkish".
+router.get("/get-highest-avg-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      { $match: { cuisine: "Turkish" } },
+      { $unwind: "$grades" },
+      {
+        $group: {
+          _id: "$name",
+          avgScore: { $avg: "$grades.score" },
+        },
+      },
+      { $sort: { avgScore: -1 } },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 82. Write a MongoDB query to find the restaurants that achieved the highest total score.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      { $unwind: "$grades" },
+      {
+        $group: {
+          _id: "$name",
+          highestScore: {
+            $sum: "$grades.score",
+          },
+        },
+      },
+      {
+        $sort: {
+          highestScore: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$highestScore",
+          restaurant: { $push: "$_id" },
+        },
+      },
+      {
+        $sort: {
+          _id: -1,
+        },
+      },
+      { $limit: 1 },
+      {
+        $group: {
+          _id: "$_id",
+          final: {
+            $push: "$restaurant",
+          },
+        },
+      },
+      {
+        $sort: {
+          final: -1,
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 83. Write a MongoDB query to find all the Chinese restaurants in Brooklyn.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.find({
+      borough: "Brooklyn",
+      cuisine: "Chinese",
+    });
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 84. Write a MongoDB query to find the restaurant with the most recent grade date.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      { $unwind: "$grades" },
+      { $sort: { "grades.date": -1 } },
+      { $limit: 1 },
+      { $project: { name: 1, "grades.date": 1, _id: 0 } },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 85. Write a MongoDB query to find the top 5 restaurants with the highest average score for each cuisine type, along with their average scores.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      { $unwind: "$grades" },
+      {
+        $group: {
+          _id: { cuisine: "$cuisine", restaurant_id: "$restaurant_id" },
+          avgScore: { $avg: "$grades.score" },
+        },
+      },
+      {
+        $sort: {
+          "_id.cuisine": 1,
+          avgScore: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.cuisine",
+          topRestaurants: {
+            $push: {
+              restaurant_id: "$_id.restaurant_id",
+              avgScore: "$avgScore",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cuisine: "$_id",
+          topRestaurants: { $slice: ["$topRestaurants", 5] },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 86. Write a MongoDB query to find the top 5 restaurants in each borough with the highest number of "A" grades.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      { $unwind: "$grades" },
+      { $match: { "grades.grade": "A" } },
+      {
+        $group: {
+          _id: { borough: "$borough", restaurant_id: "$restaurant_id" },
+          gradeCount: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          "_id.borough": 1,
+          gradeCount: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.borough",
+          topRestaurants: {
+            $push: {
+              restaurant_id: "$_id.restaurant_id",
+              gradeCount: "$gradeCount",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          borough: "$_id",
+          topRestaurants: { $slice: ["$topRestaurants", 5] },
+        },
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// 87. Write a MongoDB query to find the borough with the highest number of restaurants that have a grade of "A" and a score greater than or equal to 90.
+router.get("/get-highest-achived-score", async (req, res) => {
+  try {
+    const restaurants_data = await Restaurants.aggregate([
+      {
+        $match: {
+          "grades.grade": "A",
+          "grades.score": { $gte: 90 },
+        },
+      },
+      {
+        $group: {
+          _id: "$borough",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $limit: 1,
+      },
+    ]);
+
+    console.log(restaurants_data);
+    res.json(restaurants_data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;
